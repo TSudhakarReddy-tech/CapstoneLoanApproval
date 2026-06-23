@@ -61,6 +61,10 @@ async def run_loan_approval_workflow(state: LoanApprovalState) -> LoanApprovalSt
     workflow = create_loan_approval_workflow()
 
     # Execute workflow synchronously (LangGraph returns sync)
-    result = workflow.invoke(state)
-
-    return result
+    try:
+        result = workflow.invoke(state)
+        return result
+    except Exception as e:
+        print(f"Workflow error: {str(e)}")
+        state.add_error(f"Workflow execution failed: {str(e)}")
+        return state

@@ -1,4 +1,4 @@
-"""Base agent class with Claude integration."""
+"""Base agent class with Claude integration via Bedrock."""
 
 import os
 import json
@@ -10,10 +10,18 @@ from app.models.agent_state import LoanApprovalState
 class BaseAgent(ABC):
     """Base class for all loan approval agents."""
 
-    def __init__(self, name: str, model: str = "claude-sonnet-4-20250514"):
+    def __init__(self, name: str, model: str = "global.anthropic.claude-sonnet-4-6"):
         self.name = name
         self.model = model
-        self.client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+        # Initialize Anthropic client with Bedrock configuration
+        api_key = os.getenv("BEDROCK_API_KEY")
+        base_url = os.getenv("BEDROCK_BASE_URL", "https://llmgw-wp.tekstac.com/v1")
+
+        self.client = Anthropic(
+            api_key=api_key,
+            base_url=base_url
+        )
 
     def _create_system_prompt(self) -> str:
         """Override this method to define agent-specific system prompt."""
