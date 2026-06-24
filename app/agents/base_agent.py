@@ -1,4 +1,4 @@
-"""Base agent class with Claude integration via Anthropic API."""
+"""Base agent class with Claude integration via Bedrock API."""
 
 import os
 import json
@@ -9,23 +9,24 @@ from app.models.agent_state import LoanApprovalState
 class BaseAgent(ABC):
     """Base class for all loan approval agents."""
 
-    def __init__(self, name: str, model: str = "claude-opus-4-6"):
+    def __init__(self, name: str, model: str = "global.anthropic.claude-sonnet-4-6"):
         self.name = name
         self.model = model
 
-        # Initialize Anthropic client
-        api_key = os.getenv("ANTHROPIC_API_KEY")
+        # Initialize Bedrock client
+        bedrock_api_key = os.getenv("BEDROCK_API_KEY")
+        bedrock_base_url = os.getenv("BEDROCK_BASE_URL", "https://llmgw-wp.tekstac.com/v1")
 
         # If no API key, use mock mode
-        if not api_key:
-            print(f"⚠️  No ANTHROPIC_API_KEY found - {name} running in mock mode")
+        if not bedrock_api_key:
+            print(f"⚠️  No BEDROCK_API_KEY found - {name} running in mock mode")
             self.client = None
         else:
             try:
                 from anthropic import Anthropic
-                self.client = Anthropic(api_key=api_key)
+                self.client = Anthropic(api_key=bedrock_api_key, base_url=bedrock_base_url)
             except Exception as e:
-                print(f"⚠️  Failed to initialize Anthropic client: {e} - {name} running in mock mode")
+                print(f"⚠️  Failed to initialize Bedrock client: {e} - {name} running in mock mode")
                 self.client = None
 
     def _create_system_prompt(self) -> str:

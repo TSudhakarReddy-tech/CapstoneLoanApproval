@@ -28,7 +28,8 @@ Database (SQLite)
 
 ### Prerequisites
 - Python 3.10+
-- ANTHROPIC_API_KEY environment variable set
+- **Bedrock API Key** from tekstac gateway
+- Environment variables configured
 
 ### Installation
 
@@ -38,17 +39,39 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+### Configuration
+
+1. Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
+```
+
+2. Update `.env` with your Bedrock credentials:
+```
+BEDROCK_API_KEY=your_bedrock_api_key_here
+BEDROCK_BASE_URL=https://llmgw-wp.tekstac.com/v1
+BEDROCK_MODEL=global.anthropic.claude-sonnet-4-6
+```
+
+For detailed setup instructions, see [BEDROCK_SETUP.md](BEDROCK_SETUP.md)
+
 ### Running the Application
 
-**Streamlit UI:**
+**FastAPI Backend (Terminal 1):**
+```bash
+python api_server.py
+```
+
+**Streamlit UI (Terminal 2):**
 ```bash
 streamlit run main.py
 ```
 
-**FastAPI Backend:**
-```bash
-uvicorn app.api.app:app --reload
-```
+Access the application:
+- UI: http://localhost:8501
+- API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
+- Health Check: http://localhost:8000/health
 
 ## Project Structure
 
@@ -96,9 +119,24 @@ CapstoneLoanApproval/
 ## Environment Variables
 
 ```
-ANTHROPIC_API_KEY=your_api_key_here
+# Bedrock API Configuration (Required)
+BEDROCK_API_KEY=your_bedrock_api_key_here
+BEDROCK_BASE_URL=https://llmgw-wp.tekstac.com/v1
+BEDROCK_MODEL=global.anthropic.claude-sonnet-4-6
+
+# Database Configuration
 DATABASE_URL=sqlite:///./loan_approval.db
+
+# API Configuration
+API_HOST=0.0.0.0
+API_PORT=8000
+
+# Streamlit Configuration
+STREAMLIT_SERVER_PORT=8501
+STREAMLIT_SERVER_ADDRESS=localhost
 ```
+
+**See [BEDROCK_SETUP.md](BEDROCK_SETUP.md) for detailed configuration instructions.**
 
 ## Testing
 
