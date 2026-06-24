@@ -35,27 +35,47 @@ Consider:
         """Analyze applicant profile."""
         app = state.application
 
-        prompt = f"""Analyze this applicant profile:
-
-Applicant Name: {app.applicant_name}
-Age: {app.age} years
-Monthly Income: ${app.monthly_income:,.2f}
-Employment Type: {app.employment_type}
-Years Employed: {app.years_employed}
-Requested Loan Amount: ${app.loan_amount:,.2f}
-Loan Tenure: {app.loan_tenure_months} months
-
-Evaluate income stability and employment suitability. Return only valid JSON."""
-
         try:
-            response = self.query_claude([{"role": "user", "content": prompt}], temperature=0.3)
-            result = self._parse_response(response)
+            # Calculate income stability score based on years employed
+            if app.years_employed >= 5:
+                income_stability = 85
+                employment_assessment = "Strong employment stability - 5+ years at current employer"
+            elif app.years_employed >= 2:
+                income_stability = 70
+                employment_assessment = "Moderate employment stability - 2+ years at current employer"
+            else:
+                income_stability = 45
+                employment_assessment = "Limited employment history - Less than 2 years at current employer"
+
+            # Adjust based on employment type
+            if app.employment_type == "Salaried":
+                income_stability += 10
+            elif app.employment_type == "Self-employed":
+                income_stability -= 15
+
+            # Categorize age
+            if app.age < 30:
+                age_category = "Young Professional"
+            elif app.age < 50:
+                age_category = "Mid-Career"
+            elif app.age < 65:
+                age_category = "Experienced"
+            else:
+                age_category = "Pre-Retirement"
+
+            # Determine risk level
+            if income_stability >= 75:
+                risk_level = "Low"
+            elif income_stability >= 50:
+                risk_level = "Medium"
+            else:
+                risk_level = "High"
 
             state.profile_analysis = ApplicationProfileAnalysis(
-                income_stability_score=result.get("income_stability_score", 50),
-                employment_assessment=result.get("employment_assessment", "Assessment pending"),
-                age_category=result.get("age_category", "Mid-Career"),
-                profile_risk_level=result.get("profile_risk_level", "Medium"),
+                income_stability_score=min(100, max(0, income_stability)),
+                employment_assessment=employment_assessment,
+                age_category=age_category,
+                profile_risk_level=risk_level,
             )
 
             self._log_action(

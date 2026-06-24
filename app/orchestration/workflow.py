@@ -38,20 +38,20 @@ def create_loan_approval_workflow():
         """Execute compliance check."""
         return compliance_agent.run(state)
 
-    # Add nodes to workflow
-    workflow.add_node("profile_analysis", profile_node)
-    workflow.add_node("financial_analysis", financial_node)
-    workflow.add_node("loan_decision", decision_node)
-    workflow.add_node("compliance_check", compliance_node)
+    # Add nodes to workflow (use descriptive names that don't conflict with state keys)
+    workflow.add_node("profile_agent_node", profile_node)
+    workflow.add_node("financial_agent_node", financial_node)
+    workflow.add_node("decision_agent_node", decision_node)
+    workflow.add_node("compliance_agent_node", compliance_node)
 
     # Define edges - workflow sequence
-    workflow.add_edge("profile_analysis", "financial_analysis")
-    workflow.add_edge("financial_analysis", "loan_decision")
-    workflow.add_edge("loan_decision", "compliance_check")
+    workflow.add_edge("profile_agent_node", "financial_agent_node")
+    workflow.add_edge("financial_agent_node", "decision_agent_node")
+    workflow.add_edge("decision_agent_node", "compliance_agent_node")
 
     # Set entry and exit points
-    workflow.set_entry_point("profile_analysis")
-    workflow.set_finish_point("compliance_check")
+    workflow.set_entry_point("profile_agent_node")
+    workflow.set_finish_point("compliance_agent_node")
 
     return workflow.compile()
 
@@ -63,6 +63,18 @@ async def run_loan_approval_workflow(state: LoanApprovalState) -> LoanApprovalSt
     # Execute workflow synchronously (LangGraph returns sync)
     try:
         result = workflow.invoke(state)
+
+        # Convert dict result back to LoanApprovalState if needed
+        if isinstance(result, dict):
+            state.profile_analysis = result.get('profile_analysis')
+            state.financial_analysis = result.get('financial_analysis')
+            state.loan_decision = result.get('loan_decision')
+            state.compliance_result = result.get('compliance_result')
+            state.workflow_status = result.get('workflow_status', 'completed')
+            state.error_messages = result.get('error_messages', [])
+            state.audit_trail = result.get('audit_trail', [])
+            return state
+
         return result
     except Exception as e:
         print(f"Workflow error: {str(e)}")

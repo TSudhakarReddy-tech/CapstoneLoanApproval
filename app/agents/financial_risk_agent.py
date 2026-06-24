@@ -43,26 +43,66 @@ Consider:
             else 0
         )
 
-        prompt = f"""Analyze this applicant's financial risk:
-
-Credit Score: {app.credit_score}
-Total Liabilities: ${app.total_liabilities:,.2f}
-Monthly Income: ${app.monthly_income:,.2f}
-Debt-to-Income Ratio: {debt_to_income_ratio:.2%}
-Loan Amount Requested: ${app.loan_amount:,.2f}
-
-Evaluate credit quality, debt burden, and overall financial risk. Return only valid JSON."""
-
         try:
-            response = self.query_claude([{"role": "user", "content": prompt}], temperature=0.3)
-            result = self._parse_response(response)
+            # Assess credit score
+            if app.credit_score >= 750:
+                credit_assessment = "Excellent credit history - Strong credit profile"
+                credit_score_points = 90
+            elif app.credit_score >= 700:
+                credit_assessment = "Good credit history - Acceptable credit profile"
+                credit_score_points = 75
+            elif app.credit_score >= 650:
+                credit_assessment = "Fair credit history - Some concerns noted"
+                credit_score_points = 55
+            else:
+                credit_assessment = "Poor credit history - Significant concerns"
+                credit_score_points = 30
+
+            # Assess liabilities
+            if app.total_liabilities == 0:
+                liability_assessment = "No existing liabilities - Clean financial slate"
+                liability_points = 100
+            elif app.total_liabilities < app.monthly_income * 3:
+                liability_assessment = "Manageable liabilities - Within acceptable range"
+                liability_points = 75
+            elif app.total_liabilities < app.monthly_income * 6:
+                liability_assessment = "Moderate liabilities - Some concern"
+                liability_points = 50
+            else:
+                liability_assessment = "High liabilities - Significant concern"
+                liability_points = 25
+
+            # Assess DTI
+            if debt_to_income_ratio < 0.3:
+                dti_assessment = "Excellent DTI ratio"
+                dti_points = 90
+            elif debt_to_income_ratio < 0.43:
+                dti_assessment = "Good DTI ratio"
+                dti_points = 75
+            elif debt_to_income_ratio < 0.50:
+                dti_assessment = "Acceptable DTI ratio"
+                dti_points = 55
+            else:
+                dti_assessment = "High DTI ratio - Exceeds threshold"
+                dti_points = 20
+
+            # Calculate overall financial risk score
+            financial_risk_score = (credit_score_points + liability_points + dti_points) / 3
+
+            # Determine risk level
+            if financial_risk_score >= 75:
+                risk_level = "Low"
+            elif financial_risk_score >= 50:
+                risk_level = "Medium"
+            else:
+                risk_level = "High"
 
             state.financial_analysis = FinancialRiskAnalysis(
-                debt_to_income_ratio=result.get("debt_to_income_ratio", debt_to_income_ratio),
-                credit_assessment=result.get("credit_assessment", "Assessment pending"),
-                liability_assessment=result.get("liability_assessment", "Assessment pending"),
-                financial_risk_score=result.get("financial_risk_score", 50),
-                risk_level=result.get("risk_level", "Medium"),
+                debt_to_income_ratio=debt_to_income_ratio,
+                credit_assessment=credit_assessment,
+                liability_assessment=liability_assessment,
+                financial_risk_score=financial_risk_score,
+                risk_level=risk_level,
             )
 
             self._log_action(

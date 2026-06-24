@@ -83,6 +83,6 @@ class ApplicationStatus(BaseModel):
 
     application_id: str
     status: str  # Submitted, Processing, Completed, Rejected
-    decision: Optional[LoanDecisionResponse] = None
+    decision: Optional[dict] = None
     created_at: datetime
     updated_at: datetime

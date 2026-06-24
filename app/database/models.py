@@ -52,6 +52,15 @@ class LoanDecisionRecord(Base):
     compliance_status = Column(String(50), nullable=False)
     case_reference = Column(String(100), nullable=False, unique=True)
 
+    # Enhanced decision details
+    decision_summary = Column(Text, nullable=True)
+    decision_category = Column(String(20), nullable=True)  # APPROVED, REJECTED, UNDER_REVIEW
+    rejection_reason = Column(Text, nullable=True)  # Detailed rejection reason if rejected
+    approval_conditions = Column(JSON, nullable=True)  # Conditions for approval
+    case_id = Column(String(50), nullable=False, unique=True, index=True)  # Formatted case ID
+    review_notes = Column(Text, nullable=True)  # Notes for under-review cases
+    risk_level = Column(String(20), nullable=True)  # LOW, MEDIUM, HIGH, CRITICAL
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
