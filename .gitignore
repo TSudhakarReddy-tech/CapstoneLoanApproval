@@ -27,21 +27,41 @@ venv.bak/
 *.db
 *.sqlite
 *.sqlite3
+*.db.backup
+
+# Backups and temporary files
+*.backup
+*.bak
+*.tmp
 
 # Streamlit
 .streamlit/
 .streamlit_cache/
 streamlit_cache/
+.streamlit_cache_app/
 
 # Testing
 .pytest_cache/
 .coverage
 htmlcov/
 .tox/
+.coverage.*
+test_results/
 
 # Logs
 *.log
 logs/
+debug.log
+error.log
+
+# LangGraph/LangChain
+.langgraph/
+.langchain_cache/
+
+# Bedrock/API related
+*.credentials
+credentials/
+secrets/
 
 # Distribution / packaging
 build/
@@ -72,3 +92,35 @@ dmypy.json
 # OS
 Thumbs.db
 .DS_Store
+
+# Project specific
+.env.production
+.env.staging
+dump.rdb
+
+# Editor config
+.editorconfig
+*.sublime-project
+*.sublime-workspace
+
+# macOS
+.AppleDouble
+.LSOverride
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+
+# Windows
+desktop.ini
+$RECYCLE.BIN/
+
+# Node (if frontend components added)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# IDE specific project files
+.project
+.pydevproject
+.settings/
+*.iml
